@@ -1,10 +1,3 @@
-<?php
-$dir = getcwd();
-if(file_exists($dir . "\setup.php")) {
-	echo "Please visit the setup script first!";
-	die();
-} else {
-?>
 <!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml">
 	<head>
@@ -73,4 +66,3 @@ if(file_exists($dir . "\setup.php")) {
 	</body>
 
 </html>
-<?php } ?>

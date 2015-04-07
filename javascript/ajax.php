@@ -99,6 +99,10 @@ switch ($_GET['page']) {
 		if(isset($_POST['layout'])) {
 			$layout = $_POST['layout'];
 		}
+		
+		if(isset($_POST['removeClients'])) {
+			$remove = $_POST['removeClients'];
+		}
 
 		try {
 			$pdo = new PDO($dsn, $db_username, $db_password);
@@ -107,12 +111,17 @@ switch ($_GET['page']) {
 			$insertGenres -> bindParam(1, $genres);
 			$insertGenres -> execute();
 
-			$updateClients = $pdo -> prepare("UPDATE clients SET selected = 0 WHERE selected = 1");
-			$updateClients -> execute();
-
-			$updateClients = $pdo -> prepare("UPDATE clients SET selected = 1 WHERE id = ?");
-			$updateClients -> bindParam(1, $client);
-			$updateClients -> execute();
+			if(isset($remove)) {
+				$updateClients = $pdo -> prepare ("DELETE FROM clients");
+				$updateClients -> execute();
+			} else {
+				$updateClients = $pdo -> prepare("UPDATE clients SET selected = 0 WHERE selected = 1");
+				$updateClients -> execute();
+		
+				$updateClients = $pdo -> prepare("UPDATE clients SET selected = 1 WHERE id = ?");
+				$updateClients -> bindParam(1, $client);
+				$updateClients -> execute();	
+			}
 			
 			$updateLayout = $pdo -> prepare("UPDATE configuration SET displaytype = ?");
 			$updateLayout -> bindParam(1, $layout);

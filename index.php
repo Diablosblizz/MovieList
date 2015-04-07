@@ -1,10 +1,4 @@
 <?php
-error_reporting(E_ALL);
-$dir = getcwd();
-if(file_exists($dir . "\setup.php")) {
-	echo "Please visit the setup script first!";
-	die();
-} else {
 include ("configuration.php");
 include ("Plex.php");
 include ("Client.php");
@@ -486,6 +480,3 @@ if ($actPlexMovies > $dbPlexMovies) {
 		</div>
 	</body>
 </html>
-<?php
-}
-?>

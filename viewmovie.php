@@ -1,4 +1,5 @@
 <?php
+ERROR_REPORTING(E_ALL);
 /* File: viewmovie.php
  * 
  * Purpose: This file provides the user with the UI to view movie metadata.
@@ -6,14 +7,11 @@
  * the movie is located in Plex's library.
  *
 */
-$dir = getcwd();
-if(file_exists($dir . "\setup.php")) {
-	echo "Please visit the setup script first!";
-	die();
-} else {
 if (isset($_GET['movieid'])) {
     $movieid = $_GET['movieid'];
     include ("configuration.php");
+	include ("Plex.php");
+	$plex = new Plex($plexIP . ':' . $plexPort);
     try {
         $pdo = new PDO($dsn, $db_username, $db_password);
         $stmt = $pdo->prepare('SELECT * FROM `movies` WHERE id = ?');
@@ -65,7 +63,12 @@ if (isset($_GET['movieid'])) {
  </div>
   <div data-role="content" id="movieinfo">
   	<?php
-  	if(strpos($row["media"], "Plex") !== FALSE) { ?>
+	$plexOnline = $plex -> IsPlexReachable($plexIP, $plexPort);
+	$checkClient = $pdo -> prepare ("SELECT count(*) FROM clients WHERE selected = 1");
+	$checkClient -> execute();
+	$fetchClient = $checkClient -> fetch();
+  	if(strpos($row["media"], "Plex") !== FALSE && $plexOnline == 1 && $fetchClient[0] > 0) { 
+	?>
 	<img src="<?= 'images/posters/' . $row["id"] . '_Poster.png'; ?>" style="width: 200px; height: 300px; display: block; margin-left: auto; margin-right: auto;" alt="<?= $row['displaytitle']; ?> Poster"  onerror="this.src='images/img_notfound.png';" onclick="javascript: playMovie(<?=$row['plexMediaID'];?>, <?=$row['id'];?>, '<?=addslashes($row['displaytitle']);?>', '<?=htmlspecialchars($row['actors']);?>');"/><br /><br />
     <?php } else { ?>
     <img src="<?= 'images/posters/' . $row["id"] . '_Poster.png'; ?>" style="width: 200px; height: 300px; display: block; margin-left: auto; margin-right: auto;" alt="<?= $row['displaytitle']; ?> Poster"  onerror="this.src='images/img_notfound.png';"/><br /><br />	
@@ -144,6 +147,5 @@ if (isset($_GET['movieid'])) {
     }
 } else {
     header("Location:	index.php");
-}
 }
 ?>

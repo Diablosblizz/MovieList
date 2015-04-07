@@ -5,10 +5,10 @@
 */
 
 /** Database configuration **/
-$db_username = "movielistdev";
-$db_password = "dev";
-$dsn = "mysql:host=192.168.1.143;dbname=movielist_dev";
-//$plexIP = "192.168.1.105";
+$db_username = "Database Username";
+$db_password = "Database Password";
+$dsn = "mysql:host=192.168.1.143;dbname=Database";
+$plexIP = "Plex IP";
 $plexPort = "32400";
-$plexServID = "cdfa8413a079f952f14bcff8a7017b426d28a1d9";
+$plexServID = "Plex Server ID";
 ?>

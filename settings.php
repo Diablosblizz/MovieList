@@ -278,6 +278,9 @@ try {
 							}
 						}
 						?>
+				<label>
+					<input type="checkbox" id="removeClients" name="removeClients">
+					Remove All Clients</label>
 			</div>
 			<div data-role="collapsible" style="padding-bottom: 20px; padding-right: 10px; padding-left: 10px;">
 				<span style="font-size: 12px;">Note: This option chooses what Layout to output the movies in.</span>
