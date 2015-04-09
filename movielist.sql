@@ -17,6 +17,8 @@ CREATE TABLE `configuration` (
   `displaytype` int(11) DEFAULT '1'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+INSERT INTO configuration (plexMovies, lastupdate, maingenres, displaytype) VALUES (0, 0, "action,comedy,", 1);
+
 CREATE TABLE `movies` (
   `id` int(12) NOT NULL AUTO_INCREMENT,
   `genre` varchar(100) NOT NULL,

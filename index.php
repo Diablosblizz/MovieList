@@ -2,6 +2,7 @@
 include ("configuration.php");
 include ("Plex.php");
 include ("Client.php");
+$dir = getcwd();
 
 $pdo = new PDO($dsn, $db_username, $db_password);
 $pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
