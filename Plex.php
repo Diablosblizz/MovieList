@@ -1,4 +1,6 @@
 <?php
+include_once "configuration.php";
+
 class Plex {
 
 	private $IpAddress = 0;
@@ -30,7 +32,26 @@ class Plex {
 	}
 
 	function GetCorrectSection() {
-		$xml = simplexml_load_file("http://" . $this -> IpAddress . "/library/sections/");
+		if(@simplexml_load_file("http://" . $this -> IpAddress . "/library/sections/")) {
+			$xml = simplexml_load_file("http://" . $this -> IpAddress . "/library/sections/");
+		} else {
+			$authToken = $this -> GetAuthToken();
+			$curl = curl_init();
+			
+			curl_setopt_array($curl, array(
+				CURLOPT_RETURNTRANSFER => true,
+				CURLOPT_URL => 'http://' . $this -> IpAddress . '/library/sections/',
+				CURLOPT_HTTPHEADER => array(
+					'Content-Length: 0',
+					'X-Plex-Client-Identifier: movielist',
+					'X-Plex-Token: ' . $authToken
+				)
+			));
+			
+			$response = curl_exec($curl);
+			$xml = simplexml_load_string($response);
+			curl_close($curl);
+		}
 		foreach ($xml->Directory as $section) {
 			$attributes = $section -> attributes();
 			if ($section["title"] == "Movies") {
@@ -40,7 +61,26 @@ class Plex {
 	}
 	
 	function GetMovieTitles() {
-		$xml = simplexml_load_file("http://" . $this -> IpAddress . "/library/sections/" . $this -> GetCorrectSection() . "/all");
+		if(@simplexml_load_file("http://" . $this -> IpAddress . "/library/sections/" . $this -> GetCorrectSection() . "/all")) {
+			$xml = simplexml_load_file("http://" . $this -> IpAddress . "/library/sections/" . $this -> GetCorrectSection() . "/all");
+		} else {
+			$authToken = $this -> GetAuthToken();
+			$curl = curl_init();
+			
+			curl_setopt_array($curl, array(
+				CURLOPT_RETURNTRANSFER => true,
+				CURLOPT_URL => 'http://' . $this -> IpAddress . '/library/sections/' . $this -> GetCorrectSection() . '/all',
+				CURLOPT_HTTPHEADER => array(
+					'Content-Length: 0',
+					'X-Plex-Client-Identifier: movielist',
+					'X-Plex-Token: ' . $authToken
+				)
+			));
+			
+			$response = curl_exec($curl);
+			$xml = simplexml_load_string($response);
+			curl_close($curl);
+		}
 		$movies = array();
 		foreach ($xml->Video as $movie) {
 			$MovieArray = array();
@@ -101,7 +141,26 @@ class Plex {
 	}
 
 	function GetTotalMovies() {
-		$xml = simplexml_load_file("http://" . $this -> IpAddress . "/library/sections/" . $this -> GetCorrectSection() . "/all");
+		if(@simplexml_load_file("http://" . $this -> IpAddress . "/library/sections/" . $this -> GetCorrectSection() . "/all")) {
+			$xml = simplexml_load_file("http://" . $this -> IpAddress . "/library/sections/" . $this -> GetCorrectSection() . "/all");
+		} else {
+			$authToken = $this -> GetAuthToken();
+			$curl = curl_init();
+			
+			curl_setopt_array($curl, array(
+				CURLOPT_RETURNTRANSFER => true,
+				CURLOPT_URL => 'http://' . $this -> IpAddress . '/library/sections/' . $this -> GetCorrectSection() . '/all',
+				CURLOPT_HTTPHEADER => array(
+					'Content-Length: 0',
+					'X-Plex-Client-Identifier: movielist',
+					'X-Plex-Token: ' . $authToken
+				)
+			));
+			
+			$response = curl_exec($curl);
+			$xml = simplexml_load_string($response);
+			curl_close($curl);
+		}
 		$movies = 0;
 		foreach ($xml->Video as $movie) {
 			$movies++;
@@ -110,7 +169,26 @@ class Plex {
 	}
 
 	function GetClients() {
-		$xml = simplexml_load_file("http://" . $this -> IpAddress . "/clients/");
+		if(@simplexml_load_file("http://" . $this -> IpAddress . "/clients/")) {
+			$xml = simplexml_load_file("http://" . $this -> IpAddress . "/clients/");
+		} else {
+			$authToken = $this -> GetAuthToken();
+			$curl = curl_init();
+			
+			curl_setopt_array($curl, array(
+				CURLOPT_RETURNTRANSFER => true,
+				CURLOPT_URL => 'http://' . $this -> IpAddress . '/clients/',
+				CURLOPT_HTTPHEADER => array(
+					'Content-Length: 0',
+					'X-Plex-Client-Identifier: movielist',
+					'X-Plex-Token: ' . $authToken
+				)
+			));
+			
+			$response = curl_exec($curl);
+			$xml = simplexml_load_string($response);
+			curl_close($curl);
+		}
 		if ($xml["size"] > 0) {
 			$clients = array();
 			foreach ($xml->Server as $client) {
@@ -123,6 +201,50 @@ class Plex {
 		} else {
 			return "No Clients";
 		}
+	}
+	
+function GetAuthToken() {
+		$plexUser;
+		$plexPass;
+		try {
+			global $dsn;
+			global $db_username;
+			global $db_password;
+			$pdo = new PDO($dsn, $db_username, $db_password);
+			$pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+			$getAuth = $pdo -> prepare("SELECT plexusername, plexpassword FROM configuration");
+			$getAuth -> execute();
+			$fetchAuth = $getAuth -> fetch();
+			$plexUser = $fetchAuth[0];
+			$plexPass = $fetchAuth[1];
+			$pdo = null;
+		} catch (PDOException $pdo) {
+			die("There was a problem getting the client details. Please try again.");
+		}
+
+		$curl = curl_init();
+
+		curl_setopt_array($curl, array(
+			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_URL => 'https://my.plexapp.com/users/sign_in.xml',
+			CURLOPT_CAINFO => getcwd() . '/cacert.pem',
+			CURLOPT_POST => true,
+			CURLOPT_USERPWD => $plexUser . ':' . $plexPass,
+			CURLOPT_HTTPHEADER => array(
+				'Content-Length: 0',
+				'X-Plex-Client-Identifier: movielist'
+			)
+		));
+
+		$response = curl_exec($curl);
+		$xmlR = new SimpleXMLElement($response);
+		if (isset($xmlR->error)) {
+			echo "<script>warnUser()</script>";
+		} else {
+			$authToken = $xmlR["authenticationToken"];
+			return $authToken;
+		}
+		curl_close($curl);
 	}
 	
 	function GetTMDBId($title, $year) {

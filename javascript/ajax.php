@@ -103,6 +103,14 @@ switch ($_GET['page']) {
 		if(isset($_POST['removeClients'])) {
 			$remove = $_POST['removeClients'];
 		}
+		
+		if(isset($_POST['plexUsername'])) {
+			$plexUsername = $_POST['plexUsername'];
+		}
+		
+		if(isset($_POST['plexPassword'])) {
+			$plexPassword = $_POST['plexPassword'];
+		}
 
 		try {
 			$pdo = new PDO($dsn, $db_username, $db_password);
@@ -126,6 +134,11 @@ switch ($_GET['page']) {
 			$updateLayout = $pdo -> prepare("UPDATE configuration SET displaytype = ?");
 			$updateLayout -> bindParam(1, $layout);
 			$updateLayout -> execute();
+			
+			$updateCreds = $pdo -> prepare("UPDATE configuration SET plexusername = ?, plexpassword = ?");
+			$updateCreds -> bindParam(1, $plexUsername);
+			$updateCreds -> bindParam(2, $plexPassword);
+			$updateCreds -> execute();
 			$pdo = null;
 
 			echo "<div style=\"padding: 8px;\" id=\"settingsSuccess\">The settings were saved successfully.</div>";

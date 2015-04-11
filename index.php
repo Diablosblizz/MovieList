@@ -123,11 +123,6 @@ if ($actPlexMovies > $dbPlexMovies) {
 					
 					$insert -> execute();
 					$lastId = $pdo -> lastInsertId();
-					//$img = 'images/posters/' . $lastId . '_Poster.png';
-					//$img = "http://" . $plex -> GetIpAddress() . $plexMovies[$i][4] . ".png";
-					//file_put_contents($img, file_get_contents("http://" . $plex -> GetIpAddress() . $plexMovies[$i][4] . ".png"));
-					//$plex->DownscaleImage('200', '300', $img, $lastId);
-					$plex->DownscaleImage("http://" . $plex->GetIpAddress() . $plexMovies[$i][4] . ".png", $lastId . "_Poster.png", 500, 600);
 					
 				} else {
 					// an entry already exists in the database, grabbing plex information
@@ -154,10 +149,6 @@ if ($actPlexMovies > $dbPlexMovies) {
 					$update->bindParam(6, $newMedia);
 					$update->bindParam(7, $currentDbId);
 					$update->execute();
-					$checkPoster = file_exists($dir . "\images\posters\\" . $currentDbId . "_Poster.png");
-					if(!$checkPoster) {
-						$plex->DownscaleImage("http://" . $plex->GetIpAddress() . $plexMovies[$i][4] . ".png", $currentDbId . "_Poster.png", 500, 600);
-					}
 				}
 			}
 		}
@@ -183,26 +174,16 @@ if ($actPlexMovies > $dbPlexMovies) {
 		<script src="http://code.jquery.com/jquery-2.1.1.min.js" type="text/javascript"></script>
 		<script src="http://code.jquery.com/mobile/1.4.3/jquery.mobile-1.4.3.js" type="text/javascript"></script>
 		<link href="http://code.jquery.com/mobile/1.4.3/jquery.mobile-1.4.3.css" rel="stylesheet" type="text/css" />
-		<link href="javascript/jquery.mobile.alphascroll.css" rel="stylesheet" type="text/css" />
 		<link rel="apple-touch-icon" href="images/iPhone-Icon.png" />
-		<link rel="stylesheet" href="add2home.css" />
 		<script type="application/javascript" src="javascript/settings.js" charset="utf-8"></script>
 		<script type="application/javascript" src="javascript/movieData.js" charset="utf-8"></script>
 		<script type="application/javascript" src="javascript/search.js" charset="utf-8"></script>
 		<script type="application/javascript" src="javascript/editMovie.js" charset="utf-8"></script>
 		<script type="application/javascript" src="javascript/addMovie.js" charset="utf-8"></script>
-		<script type="application/javascript" src="javascript/add2home.js" charset="utf-8"></script>
 		<script type="application/javascript" src="javascript/search.js" charset="utf-8"></script>
 		<script type="application/javascript" src="javascript/movieTrailers.js" charset="utf-8"></script>
 		<script type="application/javascript" src="javascript/movieControls.js" charset="utf-8"></script>
 		<script type="application/javascript" src="javascript/Chart.js" charset="utf-8"></script>
-		<script type="application/javascript" src="javascript/jquery.mobile.alphascroll.js" charset="utf-8"></script>
-		<script type="text/javascript">
-			var addToHomeConfig = {
-				returningVisitor : true, // Show the message only to returning visitors (ie: don't show it the first time)
-				expire : 720	// Show the message only once every 12 hours
-			};
-		</script>
 		<style>
 			body {
 				-webkit-transform: translateZ(0);
@@ -380,7 +361,7 @@ if ($actPlexMovies > $dbPlexMovies) {
 				<h2 style="font-size: 15px; margin-top: -5px;">Current Playback:</h2>
 				<ul data-role="listview" data-inset="true" style="margin-top: -5px;">
 					<li>
-						<a href="viewmovie.php?movieid=<?=$fetchDBInfo[0]; ?>&displayPlayBack" data-rel="dialog" data-transition="pop"> <img src="http://home.kbnetwork.ca/movielist/images/posters/<?=$fetchDBInfo[0]; ?>_Poster.png" style="width: 54px; height: 100%;"> <h2><?=$currentlyPlaying[0]; ?></h2>
+						<a href="viewmovie.php?movieid=<?=$fetchDBInfo[0]; ?>&displayPlayBack" data-rel="dialog" data-transition="pop"> <img src="images/posters/<?=$fetchDBInfo[0]; ?>_Poster.png" style="width: 54px; height: 100%;"> <h2><?=$currentlyPlaying[0]; ?></h2>
 						<p>
 							<?=$fetchDBInfo["actors"]; ?>
 						</p> </a>
@@ -444,7 +425,7 @@ if ($actPlexMovies > $dbPlexMovies) {
 			<div data-role="content">
 				<ul data-role="listview" data-inset="true" data-autodividers="true">
 					<?php
-					$alphabet = 'a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z';
+					$alphabet = '1,2,3,4,5,6,7,8,9,0,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z';
 					$alphaArray = explode(',', $alphabet);
 					for ($i = 0; $i < count($alphaArray); $i++) {
 						$queryLetter = $pdo -> prepare("SELECT id, displaytitle, actors FROM movies WHERE displaytitle LIKE CONCAT(?, '%') ORDER BY displaytitle");
@@ -464,7 +445,7 @@ if ($actPlexMovies > $dbPlexMovies) {
 			<div data-role="content">
 				<ul id="movieList" data-role="listview" data-inset="true" data-autodividers="true">
 					<?php
-					$alphabet = 'a,b,c,d,e,f,g,h,i,j,k,L,m,n,o,p,q,r,s,t,u,v,w,x,y,z';
+					$alphabet = '1,2,3,4,5,6,7,8,9,0,a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z';
 					$alphaArray = explode(',', $alphabet);
 					for ($i = 0; $i < count($alphaArray); $i++) {
 						$queryLetter = $pdo -> prepare("SELECT id, displaytitle, actors, year, movietitle FROM movies WHERE displaytitle LIKE CONCAT(?, '%') ORDER BY displaytitle");

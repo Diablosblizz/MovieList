@@ -147,6 +147,12 @@ try {
 	$selectLayout -> execute();
 	$fetchLayout = $selectLayout -> fetch();
 	
+	$selectAuth = $pdo -> prepare("SELECT plexusername, plexpassword FROM configuration");
+	$selectAuth -> execute();
+	$fetchAuth = $selectAuth -> fetch();
+	$plexUser = $fetchAuth[0];
+	$plexPass = $fetchAuth[1];
+	
 	$genreEdit = "";
 	$genreText = "";
 	
@@ -183,6 +189,16 @@ try {
 			</div>
             <div id="settings-all">
             <form id="settings-form">
+			<div data-role="collapsible" style="padding-right: 10px; padding-left: 10px;">
+				<h3>Authentication</h3>
+					<span style="font-size: 12px;">Note: This option is typically only used for when you have Plex Home enabled (or have "Require Local Authentication" enabled).</span><br /><br />
+					<label for="plexUsername">Username
+						<input type="text" name="plexUsername" id="plexUsername" value="<?=$plexUser;?>"/>
+						</label>
+					<label for="plexPassword">Password
+						<input type="password" name="plexPassword" id="plexPassword" value="<?=$plexPass;?>"/>
+						</label>
+			</div>
 			<div data-role="collapsible" style="padding-right: 10px; padding-left: 10px;">
 				<h3>Main Genres</h3>
 					<span style="font-size: 12px;">Note: This option sets which genres are shown on the main page by default. <?=$genreText;?></span>

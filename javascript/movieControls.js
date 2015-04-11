@@ -134,3 +134,12 @@ function stepForward() {
 		},
 	});
 }
+
+function warnUser() {
+	var credAlert = $(document.createElement("a")).attr("href", "#plexAlert").attr("data-icon", "alert").attr("data-rel", "popup").attr("class", "ui-btn-right").text("Alert");
+	var divAlert = $(document.createElement("div")).attr("data-role", "popup").attr("id", "plexAlert");
+	var pAlert = $(document.createElement("p")).text("Warning: it appears that you either have Plex Home or Require Network Authentication enabled and the username or password in settings is incorrect. Plex features will not work until this is corrected.");
+	
+	divAlert.append(pAlert);
+	$("#header").append(credAlert).append(divAlert).trigger('create');
+}

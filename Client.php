@@ -38,16 +38,34 @@ class Client {
 		}
 		return $fetchClient;
 	}
-	
+
 	function GetIsContentPlaying($server) {
-		try {	
+		try {
 			$currentClientID = $this -> GetSelectedClient()[2];
-			$xml = simplexml_load_file("http://" . $server . "/status/sessions");
-			
-			foreach($xml->Video as $movie) {
-				$currentID = $movie->Player["machineIdentifier"];
-				if($currentID == $currentClientID) {
-					if($movie["type"] == "movie") {
+			if (@simplexml_load_file("http://" . $server . "/status/sessions")) {
+				$xml = simplexml_load_file("http://" . $server . "/status/sessions");
+			} else {
+				$curl = curl_init();
+				$authToken = $this -> GetAuthToken();
+				curl_setopt_array($curl, array(
+					CURLOPT_RETURNTRANSFER => true,
+					CURLOPT_URL => "http://" . $server . "/status/sessions",
+					CURLOPT_HTTPHEADER => array(
+						'Content-Length: 0',
+						'X-Plex-Client-Identifier: movielist',
+						'X-Plex-Token: ' . $authToken
+					)
+				));
+
+				$response = curl_exec($curl);
+				$xml = simplexml_load_string($response);
+				curl_close($curl);
+			}
+
+			foreach ($xml->Video as $movie) {
+				$currentID = $movie -> Player["machineIdentifier"];
+				if ($currentID == $currentClientID) {
+					if ($movie["type"] == "movie") {
 						return true;
 					}
 				}
@@ -56,31 +74,89 @@ class Client {
 			die("There was a problem getting the client details. Please try again.");
 		}
 	}
-	
+
 	function GetCurrentPlayback($server) {
-		try {	
-			$currentClientID = $this -> GetSelectedClient()[2];
+		$currentClientID = $this -> GetSelectedClient()[2];
+		if (@simplexml_load_file("http://" . $server . "/status/sessions")) {
 			$xml = simplexml_load_file("http://" . $server . "/status/sessions");
-			$playingArray = array();
-			
-			foreach($xml->Video as $movie) {
-				$currentID = $movie->Player["machineIdentifier"];
-				if($currentID == $currentClientID) {
-					if($movie["type"] == "movie") {
-						$title = $movie["title"];
-						$plexId = $movie["ratingKey"];
-						array_push($playingArray, $title, $plexId);
-					}
+		} else {
+			$curl = curl_init();
+			$authToken = $this -> GetAuthToken();
+			curl_setopt_array($curl, array(
+				CURLOPT_RETURNTRANSFER => true,
+				CURLOPT_URL => "http://" . $server . "/status/sessions",
+				CURLOPT_HTTPHEADER => array(
+					'Content-Length: 0',
+					'X-Plex-Client-Identifier: movielist',
+					'X-Plex-Token: ' . $authToken
+				)
+			));
+
+			$response = curl_exec($curl);
+			$xml = simplexml_load_string($response);
+			curl_close($curl);
+		}
+		$playingArray = array();
+
+		foreach ($xml->Video as $movie) {
+			$currentID = $movie -> Player["machineIdentifier"];
+			if ($currentID == $currentClientID) {
+				if ($movie["type"] == "movie") {
+					$title = $movie["title"];
+					$plexId = $movie["ratingKey"];
+					array_push($playingArray, $title, $plexId);
 				}
 			}
-			return $playingArray;
+		}
+		return $playingArray;
+	}
+
+	function GetAuthToken() {
+		$plexUser;
+		$plexPass;
+		try {
+			global $dsn;
+			global $db_username;
+			global $db_password;
+			$pdo = new PDO($dsn, $db_username, $db_password);
+			$pdo -> setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+			$getAuth = $pdo -> prepare("SELECT plexusername, plexpassword FROM configuration");
+			$getAuth -> execute();
+			$fetchAuth = $getAuth -> fetch();
+			$plexUser = $fetchAuth[0];
+			$plexPass = $fetchAuth[1];
+			$pdo = null;
 		} catch (PDOException $pdo) {
 			die("There was a problem getting the client details. Please try again.");
 		}
+
+		$curl = curl_init();
+
+		curl_setopt_array($curl, array(
+			CURLOPT_RETURNTRANSFER => true,
+			CURLOPT_URL => 'https://my.plexapp.com/users/sign_in.xml',
+			CURLOPT_CAINFO => getcwd() . '/cacert.pem',
+			CURLOPT_POST => true,
+			CURLOPT_USERPWD => $plexUser . ':' . $plexPass,
+			CURLOPT_HTTPHEADER => array(
+				'Content-Length: 0',
+				'X-Plex-Client-Identifier: movielist'
+			)
+		));
+
+		$response = curl_exec($curl);
+		$xmlR = new SimpleXMLElement($response);
+		if (isset($xmlR->error)) {
+			echo "<script>warnUser()</script>";
+		} else {
+			$authToken = $xmlR["authenticationToken"];
+			return $authToken;
+		}
+		curl_close($curl);
 	}
 
 	function PlayPause($mode) {
-		if($mode == 0) {
+		if ($mode == 0) {
 			$ch = curl_init("http://" . $this -> IpAddress . ":" . $this -> port . "/player/playback/pause?type=video");
 		} else {
 			$ch = curl_init("http://" . $this -> IpAddress . ":" . $this -> port . "/player/playback/play?type=video");
