@@ -138,7 +138,8 @@ if ($actPlexMovies > $dbPlexMovies) {
 					$currentMedia = $fetchMedia[0];
 					$newMedia = $currentMedia . " / Plex";
 					
-					$update = $pdo->prepare("UPDATE `movies` SET plexPoster = ?, plexSummary = ?, plexMediaID = ?, writers = ?, runtime = ?, media = ? WHERE id = ?");
+					$update = $pdo->prepare("UPDATE `movies` SET plexPoster = ?, plexSummary = ?, plexMediaID = ?, writers = ?, runtime = ?, media = ?, actors = ?, genre = ?, directors = ? WHERE id = ?");
+					
 					$update->bindParam(1, $plexMovies[$i][4], PDO::PARAM_STR);
 					$update->bindParam(2, $plexMovies[$i][1], PDO::PARAM_STR);
 					$update->bindParam(3, $plexMovies[$i][7], PDO::PARAM_INT);
@@ -147,7 +148,16 @@ if ($actPlexMovies > $dbPlexMovies) {
 					$update -> bindParam(4, $writers, PDO::PARAM_STR);
 					$update->bindParam(5, $plexMovies[$i][9]);
 					$update->bindParam(6, $newMedia);
-					$update->bindParam(7, $currentDbId);
+					$actors = $plexMovies[$i][5];
+					$actors = substr($actors, 0, -1);
+					$update -> bindParam(7, $actors);
+					$genres = $plexMovies[$i][6];
+					$genres = substr($genres, 0, -1);
+					$update -> bindParam(8, $genres);
+					$directors = $plexMovies[$i][10];
+					$directors = substr($directors, 0, -1);
+					$update -> bindParam(9, $directors);
+					$update->bindParam(10, $currentDbId);
 					$update->execute();
 				}
 			}

@@ -75,11 +75,11 @@ if (!$checkPoster) {
 			)
 		));
 		$response = curl_exec($curl);
-		header("Content-Type: image/jpeg");
-		echo $response;
-		$img = "images/posters/" . $id . "_Poster.png";
+		$img = getcwd() . "/images/posters/" . $id . "_Poster.png";
 		file_put_contents($img, $response);
 		$plex -> DownscaleImage($img, $id . "_Poster.png", 500, 600);
+		header("Content-Type: image/jpeg");
+		echo $response;
 		curl_close($curl);
 	} else {
 		// Check if we can find the film with the actual film title, not the one the user specified
